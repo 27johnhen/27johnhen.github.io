@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>27johnhen.github.io</title>
+<link rel="icon" type="image/x-icon" href="favicon.png">
+</head>
+<body style="background-image: linear-gradient(to right, rgb(248, 86, 86), rgb(92, 245, 151)); color:rgb(82, 0, 205);">
+<h1>Henry Johnson</h1>
+<h2>motoronlaser.ino Arduino code and wiring</h2>
+<p>
+    <pre style="background-color: rgb(255, 255, 255); width: 1350px;">
+
+&nbsp;<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><font color="#000000">Motoron</font><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+&nbsp;<font color="#000000">MotoronI2C</font> <font color="#000000">mc</font><font color="#000000">(</font><font color="#000000">16</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">button</font> <font color="#434f54">=</font> <font color="#000000">12</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">bool</font> <font color="#000000">recalculatepercent</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot1</font> <font color="#434f54">=</font> <font color="#000000">A0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot2</font> <font color="#434f54">=</font> <font color="#000000">A1</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot3</font> <font color="#434f54">=</font> <font color="#000000">A3</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot1min</font> <font color="#434f54">=</font> <font color="#000000">48</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot2min</font> <font color="#434f54">=</font> <font color="#000000">48</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot3min</font> <font color="#434f54">=</font> <font color="#000000">50</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot1max</font> <font color="#434f54">=</font> <font color="#000000">975</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot2max</font> <font color="#434f54">=</font> <font color="#000000">995</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">pot3max</font> <font color="#434f54">=</font> <font color="#000000">915</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">pot1val</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">pot2val</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">pot3val</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">double</font> <font color="#000000">scaledpot1val</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">double</font> <font color="#000000">scaledpot2val</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">double</font> <font color="#000000">scaledpot3val</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">double</font> <font color="#000000">expon</font> <font color="#434f54">=</font> <font color="#000000">1.5</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot1actspeed</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot2actspeed</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot3actspeed</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">maxspeed</font> <font color="#434f54">=</font> <font color="#000000">150</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">const</font> <font color="#00979c">int</font> <font color="#000000">minspeed</font> <font color="#434f54">=</font> <font color="#000000">30</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot1percentspeed</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot2percentspeed</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot3percentspeed</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">int</font> <font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">bool</font> <font color="#000000">potmode</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">bool</font> <font color="#000000">serialmode</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">bool</font> <font color="#000000">seriallist</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp;<font color="#00979c">String</font> <font color="#000000">receivedstring</font> <font color="#434f54">=</font> <font color="#005c5f">""</font><font color="#000000">;</font>
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">button</font><font color="#434f54">,</font> <font color="#00979c">INPUT_PULLUP</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">begin</font><font color="#000000">(</font><font color="#000000">9600</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#d35400">Wire</font><font color="#434f54">.</font><font color="#d35400">begin</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">reinitialize</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">disableCrc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">clearResetFlag</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">disableCommandTimeout</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setMaxAcceleration</font><font color="#000000">(</font><font color="#000000">1</font><font color="#434f54">,</font> <font color="#000000">80</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setMaxDeceleration</font><font color="#000000">(</font><font color="#000000">1</font><font color="#434f54">,</font> <font color="#000000">80</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setMaxAcceleration</font><font color="#000000">(</font><font color="#000000">2</font><font color="#434f54">,</font> <font color="#000000">80</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setMaxDeceleration</font><font color="#000000">(</font><font color="#000000">2</font><font color="#434f54">,</font> <font color="#000000">80</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setMaxAcceleration</font><font color="#000000">(</font><font color="#000000">3</font><font color="#434f54">,</font> <font color="#000000">80</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setMaxDeceleration</font><font color="#000000">(</font><font color="#000000">3</font><font color="#434f54">,</font> <font color="#000000">80</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n----------------Henry's Arduino Motoron Geometric Laser Projector!!!---------------\n"</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">printpotinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#5e6d03">loop</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">potmode</font> <font color="#434f54">==</font> <font color="#00979c">true</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potmodefunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">serialmode</font> <font color="#434f54">==</font> <font color="#00979c">true</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">serialmodefunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">potmodefunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#000000">potvaltomotactspeedfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">recalculatepercent</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">setmotorspeedsfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">potselectmodebuttonfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">potmodeserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">serialmodefunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#000000">serialselectmodebuttonfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">available</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">receivedstring</font> <font color="#434f54">=</font> <b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">readStringUntil</font><font color="#000000">(</font><font color="#00979c">'\n'</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">trim</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">toLowerCase</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">quitfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">examplefunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">serialselectmodeserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potandserialseriallistfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">serialdispinstserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mxsformatfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mxformatfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">sssformatfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp; &nbsp;<font color="#000000">unconstrainedpercenttoactspeedfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">recalculatepercent</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">setmotorspeedsfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">quitfunc</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"q"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">examplefunc</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"example"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">50</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">51</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">49</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">printserialinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"\n----------------serial monitor control mode----------------"</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"\nSend 'm-s', where 'm' is the motor number (1, 2, or 3) and 's' is the speed (between 0 and 100), to make the motor go that speed."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Send 'm-' or 'm+', where 'm' is the motor number, to make the motor's speed increase (+) or decrease (-) by 1."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"In either command, type 'm' in place of the motor number to apply the command to all motors."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">"Send commands in the format 's\u2081, s\u2082, s\u2083' to apply the speed 's\u2081' to motor 1, 's\u2082' to motor 2, and 's\u2083' to motor 3."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Send 'q' to stop the motors."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Send 'example' to see an example of a pattern that the laser can create."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Press the black button or send 'p' to the serial monitor to switch to potentiometer control mode."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Send 'start' or 'stop' to start or stop receiving motor speed data."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Send 'disp' to display these instructions again."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">sssformatfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#00979c">int</font> <font color="#000000">comma1pos</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">indexOf</font><font color="#000000">(</font><font color="#005c5f">", "</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#00979c">int</font> <font color="#000000">comma2pos</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">indexOf</font><font color="#000000">(</font><font color="#005c5f">", "</font><font color="#434f54">,</font> <font color="#000000">comma1pos</font> <font color="#434f54">+</font> <font color="#000000">2</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">comma1pos</font> <font color="#434f54">!=</font> <font color="#434f54">-</font><font color="#000000">1</font> <font color="#434f54">&&</font> <font color="#000000">comma2pos</font> <font color="#434f54">!=</font> <font color="#434f54">-</font><font color="#000000">1</font><font color="#000000">)</font> <font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">speed1</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">comma1pos</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">speed2</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">comma1pos</font> <font color="#434f54">+</font> <font color="#000000">2</font><font color="#434f54">,</font> <font color="#000000">comma2pos</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">speed3</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">comma2pos</font> <font color="#434f54">+</font> <font color="#000000">2</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">speed1</font><font color="#434f54">.</font><font color="#d35400">toInt</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">speed2</font><font color="#434f54">.</font><font color="#d35400">toInt</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">speed3</font><font color="#434f54">.</font><font color="#d35400">toInt</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">int</font> <font color="#000000">comma1pos</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">indexOf</font><font color="#000000">(</font><font color="#005c5f">","</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">int</font> <font color="#000000">comma2pos</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">indexOf</font><font color="#000000">(</font><font color="#005c5f">","</font><font color="#434f54">,</font> <font color="#000000">comma1pos</font> <font color="#434f54">+</font> <font color="#000000">1</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">comma1pos</font> <font color="#434f54">!=</font> <font color="#434f54">-</font><font color="#000000">1</font> <font color="#434f54">&&</font> <font color="#000000">comma2pos</font> <font color="#434f54">!=</font> <font color="#434f54">-</font><font color="#000000">1</font><font color="#000000">)</font> <font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">speed1</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">comma1pos</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">speed2</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">comma1pos</font> <font color="#434f54">+</font> <font color="#000000">1</font><font color="#434f54">,</font> <font color="#000000">comma2pos</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">speed3</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">comma2pos</font> <font color="#434f54">+</font> <font color="#000000">1</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">speed1</font><font color="#434f54">.</font><font color="#d35400">toInt</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">speed2</font><font color="#434f54">.</font><font color="#d35400">toInt</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">speed3</font><font color="#434f54">.</font><font color="#d35400">toInt</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">mxsformatfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">length</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#434f54">&gt;</font> <font color="#000000">2</font><font color="#000000">)</font> <font color="#434f54">&&</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">1</font><font color="#434f54">,</font> <font color="#000000">2</font><font color="#000000">)</font> <font color="#434f54">==</font> <font color="#005c5f">"-"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">motornumber</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">1</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">sspeed</font> <font color="#434f54">=</font> <font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">substring</font><font color="#000000">(</font><font color="#000000">2</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#00979c">int</font> <font color="#000000">ispeed</font> <font color="#434f54">=</font> <font color="#000000">sspeed</font><font color="#434f54">.</font><font color="#d35400">toInt</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">motornumber</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"1"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">ispeed</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">motornumber</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"2"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">ispeed</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">motornumber</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"3"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">ispeed</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">motornumber</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"m"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">ispeed</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">ispeed</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#000000">ispeed</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">mxformatfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"1+"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font><font color="#434f54">++</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"2+"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font><font color="#434f54">++</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"3+"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font><font color="#434f54">++</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"m+"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font><font color="#434f54">++</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font><font color="#434f54">++</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font><font color="#434f54">++</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"1-"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font><font color="#434f54">--</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"2-"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font><font color="#434f54">--</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"3-"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font><font color="#434f54">--</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"m-"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot1percentspeedunconstrained</font><font color="#434f54">--</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot2percentspeedunconstrained</font><font color="#434f54">--</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">mot3percentspeedunconstrained</font><font color="#434f54">--</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">potvaltomotactspeedfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#000000">pot1val</font> <font color="#434f54">=</font> <font color="#d35400">analogRead</font><font color="#000000">(</font><font color="#000000">pot1</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">scaledpot1val</font> <font color="#434f54">=</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot1val</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot1actspeed</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">scaledpot1val</font><font color="#434f54">,</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot1max</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#434f54">,</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot1min</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#434f54">,</font> <font color="#000000">minspeed</font><font color="#434f54">,</font> <font color="#000000">maxspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">pot2val</font> <font color="#434f54">=</font> <font color="#d35400">analogRead</font><font color="#000000">(</font><font color="#000000">pot2</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">scaledpot2val</font> <font color="#434f54">=</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot2val</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot2actspeed</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">scaledpot2val</font><font color="#434f54">,</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot2max</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#434f54">,</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot2min</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#434f54">,</font> <font color="#000000">minspeed</font><font color="#434f54">,</font> <font color="#000000">maxspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">pot3val</font> <font color="#434f54">=</font> <font color="#d35400">analogRead</font><font color="#000000">(</font><font color="#000000">pot3</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">scaledpot3val</font> <font color="#434f54">=</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot3val</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot3actspeed</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">scaledpot3val</font><font color="#434f54">,</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot3max</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#434f54">,</font> <font color="#d35400">pow</font><font color="#000000">(</font><font color="#000000">pot3min</font><font color="#434f54">,</font> <font color="#000000">expon</font><font color="#000000">)</font><font color="#434f54">,</font> <font color="#000000">minspeed</font><font color="#434f54">,</font> <font color="#000000">maxspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">potselectmodebuttonfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#d35400">digitalRead</font><font color="#000000">(</font><font color="#000000">button</font><font color="#000000">)</font> <font color="#434f54">==</font> <font color="#00979c">LOW</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">serialmode</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potmode</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">seriallist</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">printserialinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">serialselectmodebuttonfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#d35400">digitalRead</font><font color="#000000">(</font><font color="#000000">button</font><font color="#000000">)</font> <font color="#434f54">==</font> <font color="#00979c">LOW</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">serialmode</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potmode</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">seriallist</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">printpotinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">printpotinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"\n----------------potentiometer control mode----------------"</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"\nAdjust the yellow potentiometers to control the motors."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Press the black button or send 's' to the serial monitor to switch to serial monitor control mode."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Send 'start' or 'stop' to start or stop receiving motor speed data."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">"Send 'disp' to display these instructions again."</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">unconstrainedpercenttoactspeedfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#000000">mot1percentspeed</font> <font color="#434f54">=</font> <font color="#d35400">constrain</font><font color="#000000">(</font><font color="#000000">mot1percentspeedunconstrained</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot2percentspeed</font> <font color="#434f54">=</font> <font color="#d35400">constrain</font><font color="#000000">(</font><font color="#000000">mot2percentspeedunconstrained</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot3percentspeed</font> <font color="#434f54">=</font> <font color="#d35400">constrain</font><font color="#000000">(</font><font color="#000000">mot3percentspeedunconstrained</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot1actspeed</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">mot1percentspeed</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#434f54">,</font> <font color="#000000">30</font><font color="#434f54">,</font> <font color="#000000">148</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot2actspeed</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">mot2percentspeed</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#434f54">,</font> <font color="#000000">30</font><font color="#434f54">,</font> <font color="#000000">148</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot3actspeed</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">mot3percentspeed</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#434f54">,</font> <font color="#000000">30</font><font color="#434f54">,</font> <font color="#000000">148</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">acttopercentspeedfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#000000">mot1percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">mot1actspeed</font><font color="#434f54">,</font> <font color="#000000">30</font><font color="#434f54">,</font> <font color="#000000">148</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot2percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">mot2actspeed</font><font color="#434f54">,</font> <font color="#000000">30</font><font color="#434f54">,</font> <font color="#000000">148</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot3percentspeedunconstrained</font> <font color="#434f54">=</font> <font color="#d35400">map</font><font color="#000000">(</font><font color="#000000">mot3actspeed</font><font color="#434f54">,</font> <font color="#000000">30</font><font color="#434f54">,</font> <font color="#000000">148</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot1percentspeed</font> <font color="#434f54">=</font> <font color="#d35400">constrain</font><font color="#000000">(</font><font color="#000000">mot1percentspeedunconstrained</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot2percentspeed</font> <font color="#434f54">=</font> <font color="#d35400">constrain</font><font color="#000000">(</font><font color="#000000">mot2percentspeedunconstrained</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mot3percentspeed</font> <font color="#434f54">=</font> <font color="#d35400">constrain</font><font color="#000000">(</font><font color="#000000">mot3percentspeedunconstrained</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">setmotorspeedsfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setSpeed</font><font color="#000000">(</font><font color="#000000">1</font><font color="#434f54">,</font> <font color="#000000">mot1actspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setSpeed</font><font color="#000000">(</font><font color="#000000">2</font><font color="#434f54">,</font> <font color="#000000">mot2actspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">mc</font><font color="#434f54">.</font><font color="#000000">setSpeed</font><font color="#000000">(</font><font color="#000000">3</font><font color="#434f54">,</font> <font color="#000000">mot3actspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">seriallist</font> <font color="#434f54">==</font> <font color="#00979c">true</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">recalculatepercent</font> <font color="#434f54">==</font> <font color="#00979c">true</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">acttopercentspeedfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#000000">mot1percentspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">", "</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#000000">mot2percentspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">", "</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">mot3percentspeed</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">potmodeserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">available</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">receivedstring</font> <font color="#434f54">=</font> <b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">readStringUntil</font><font color="#000000">(</font><font color="#00979c">'\n'</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">trim</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">toLowerCase</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potandserialseriallistfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potselectmodeserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potdispinstserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">potandserialseriallistfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"start"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">seriallist</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"stop"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">seriallist</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">potselectmodeserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"s"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">serialmode</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potmode</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">seriallist</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">printserialinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">serialselectmodeserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"p"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">serialmode</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">potmode</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">seriallist</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">printpotinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">potdispinstserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"disp"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">printpotinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+&nbsp;
+&nbsp;
+&nbsp;<font color="#00979c">void</font> <font color="#000000">serialdispinstserialfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">receivedstring</font><font color="#434f54">.</font><font color="#d35400">equals</font><font color="#000000">(</font><font color="#005c5f">"disp"</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">{</font>
+&nbsp; &nbsp;&nbsp;&nbsp;<font color="#000000">printserialinstfunc</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+&nbsp; &nbsp;<font color="#000000">}</font>
+&nbsp;<font color="#000000">}</font>
+
+</pre>
+
+Wiring: Connect an M3S550 to an Arduino Uno. Connect three motors and an appropriate power supply to the shield. Connect a button to pin 12 and ground. Connect three potentiometers to ground, 5v, and A0, A1, and A3.<br><br>
+
+<a href="index.html"><button style="background-color:rgb(255, 242, 0);color:rgb(0, 120, 189); border-color:rgb(0, 162, 255)">back to home</button></a></p>
+</body>
+</html>
