@@ -10,8 +10,9 @@ main:
 <body style="background-image: linear-gradient(to right, rgb(248, 86, 86), rgb(92, 245, 151)); color:rgb(82, 0, 205);">
 <h1>Henry Johnson</h1>
 <h2>pagename</h2>
-<p>
-</p>
+<p><br><br>
+
+    <a href="index.html"><button style="background-color:rgb(255, 242, 0);color:rgb(0, 120, 189); border-color:rgb(0, 162, 255)">back to home</button></a></p>
 </body>
 </html>
 
